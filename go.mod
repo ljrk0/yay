@@ -7,6 +7,7 @@ require (
 	github.com/bradleyjkemp/cupaloy v2.3.0+incompatible
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/leonelquinteros/gotext v1.4.0
+	github.com/libgit2/git2go/v31 v31.4.14 // indirect
 	github.com/mikkeloscar/aur v0.0.0-20200113170522-1cb4e2949656
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.7.0

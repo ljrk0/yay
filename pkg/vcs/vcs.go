@@ -9,6 +9,7 @@ import (
 
 	gosrc "github.com/Morganamilo/go-srcinfo"
 	"github.com/leonelquinteros/gotext"
+	git "github.com/libgit2/git2go/v31"
 
 	"github.com/Jguer/yay/v10/pkg/settings/exe"
 	"github.com/Jguer/yay/v10/pkg/text"
@@ -57,21 +58,34 @@ func (v *InfoStore) getCommit(url, branch string, protocols []string) string {
 	if len(protocols) > 0 {
 		protocol := protocols[len(protocols)-1]
 
-		cmd := v.CmdBuilder.BuildGitCmd("", "ls-remote", protocol+"://"+url, branch)
-		stdout, _, err := v.Runner.Capture(cmd, 5)
+		remotes := &git.RemoteCollection{}
+		remote, err := remotes.CreateWithOptions(protocol+"://"+url, nil)
+		if err != nil {
+			text.Warnln(err)
+			return ""
+		}
+		defer remote.Free()
+
+		err = remote.ConnectFetch(nil, nil, nil)
 		if err != nil {
 			text.Warnln(err)
 			return ""
 		}
 
-		split := strings.Fields(stdout)
-
-		if len(split) < 2 {
-			return ""
+		heads, err := remote.Ls(branch)
+		if err != nil {
+			text.Warnln(err)
 		}
 
-		commit := split[0]
-		return commit
+		for _, head := range heads {
+			if len(heads) > 1 {
+				text.Warnln("Ambigious branch specifier")
+			}
+			return head.Id.String()
+		}
+
+		text.Warnln("No branch "+branch+"found")
+		return ""
 	}
 
 	return ""
